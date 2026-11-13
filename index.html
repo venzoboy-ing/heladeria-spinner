@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ice Cream Flavor Spinner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5efe4; --paper:#fbf8f2; --ink:#2a1d17; --soft:#7a6a5f; --line:#e3d8c8;
+    --accent:#2a1d17; --green:#5d7a4e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'DM Sans',system-ui,sans-serif;color:var(--ink);background:var(--bg);
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 18px 56px;-webkit-font-smoothing:antialiased}
+  .eyebrow{font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--soft);margin:0}
+  h1{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:clamp(40px,8vw,64px);line-height:1;margin:10px 0 8px;letter-spacing:-.01em}
+  h1 em{font-style:italic}
+  .sub{color:var(--soft);margin:0 0 28px;text-align:center;font-size:15px}
+  .rule{width:40px;height:1px;background:var(--ink);margin:0 auto 26px;opacity:.5}
+  .modes{display:flex;gap:0;border:1px solid var(--ink);border-radius:2px;margin-bottom:14px;flex-wrap:wrap;justify-content:center}
+  .modes button{border:0;background:transparent;font:inherit;font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:10px 18px;cursor:pointer;color:var(--ink)}
+  .modes button+button{border-left:1px solid var(--ink)}
+  .modes button.on{background:var(--ink);color:var(--paper)}
+  .vegan{display:flex;align-items:center;gap:8px;margin:0 0 30px;color:var(--soft);cursor:pointer;user-select:none;font-size:14px}
+  .vegan input{accent-color:var(--green);width:16px;height:16px}
+  .wheel-wrap{position:relative;width:min(86vw,400px);aspect-ratio:1}
+  canvas#wheel{width:100%;height:100%;display:block}
+  .pointer{position:absolute;left:50%;top:-12px;transform:translateX(-50%);width:0;height:0;
+    border-left:11px solid transparent;border-right:11px solid transparent;border-top:22px solid var(--ink);z-index:2}
+  .hub{position:absolute;inset:0;margin:auto;width:24%;height:24%;border-radius:50%;background:var(--paper);
+    display:flex;align-items:center;justify-content:center;border:1px solid var(--ink);cursor:pointer;
+    font-family:'Instrument Serif',Georgia,serif;font-size:clamp(20px,5vw,28px);color:var(--ink);transition:background .2s}
+  .hub:hover{background:#efe6d6}
+  .spin{margin-top:30px;border:1px solid var(--ink);font:inherit;font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:var(--paper);cursor:pointer;
+    background:var(--ink);padding:15px 52px;border-radius:2px;transition:background .2s,color .2s}
+  .spin:hover{background:transparent;color:var(--ink)}
+  .spin:disabled{opacity:.4;cursor:default}
+  .result{margin-top:30px;min-height:110px;text-align:center;background:var(--paper);border:1px solid var(--line);
+    padding:20px 28px;max-width:420px;width:100%;opacity:0;transform:translateY(6px);transition:all .4s ease}
+  .result.show{opacity:1;transform:none}
+  .result .label{color:var(--soft);font-size:11px;text-transform:uppercase;letter-spacing:.24em}
+  .result .big{font-family:'Instrument Serif',Georgia,serif;font-size:34px;line-height:1.15;margin-top:8px}
+  .result .note{color:var(--soft);margin-top:6px;font-size:15px}
+  .result .note b{color:var(--ink);font-weight:500}
+  .cone{display:none}
+  .panel{margin-top:16px;width:100%;max-width:420px;border-top:1px solid var(--line);padding:16px 2px 4px}
+  .panel+.panel{margin-top:0}
+  .panel summary{cursor:pointer;font-size:13px;letter-spacing:.14em;text-transform:uppercase;list-style:none;display:flex;justify-content:space-between}
+  .panel summary::-webkit-details-marker{display:none}
+  .panel summary::after{content:'+';font-size:18px;line-height:1}
+  .panel[open] summary::after{content:'–'}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0}
+  .chip{display:flex;align-items:center;gap:4px;padding:5px 6px 5px 12px;border:1px solid var(--line);background:var(--paper);border-radius:2px;font-size:14px}
+  .chip button{border:0;background:transparent;color:var(--soft);cursor:pointer;font:inherit;font-size:12px;padding:2px 5px}
+  .chip .v{font-size:11px;letter-spacing:.08em;opacity:.35}
+  .chip .v.on{opacity:1;color:var(--green);font-weight:700}
+  .add{display:flex;gap:8px}
+  .add input{flex:1;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);background:var(--paper);border-radius:2px;outline:none}
+  .add input:focus{border-color:var(--ink)}
+  .add button{font:inherit;font-size:13px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--ink);background:transparent;padding:10px 16px;cursor:pointer;border-radius:2px}
+  .reset{font:inherit;font-size:13px;border:0;background:transparent;color:var(--soft);padding:10px 0 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+  .history{list-style:none;padding:0;margin:12px 0 0;color:var(--soft);font-size:14px}
+  .history li{padding:7px 0;border-bottom:1px solid var(--line)}
+  .history li:last-child{border:0}
+  footer{margin-top:40px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft)}
+  #confetti{display:none}
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<p class="eyebrow">Heladería · San Mateo</p>
+<h1>Spin the <em>scoop</em></h1>
+<p class="sub">Can't decide? Let the wheel choose for you.</p>
+<div class="rule"></div>
+
+<div class="modes" role="tablist">
+  <button class="on" data-mode="single">One scoop</button>
+  <button data-mode="combo">Combo + topping</button>
+  <button data-mode="treat">Surprise treat</button>
+</div>
+<label class="vegan"><input type="checkbox" id="veganOnly"> Vegan &amp; gluten-free only</label>
+
+<div class="wheel-wrap">
+  <div class="pointer"></div>
+  <canvas id="wheel" width="840" height="840"></canvas>
+  <button class="hub" id="hub" aria-label="Spin">SM</button>
+</div>
+
+<button class="spin" id="spin">Spin</button>
+
+<div class="result" id="result"></div>
+
+<details class="panel">
+  <summary>Edit flavors</summary>
+  <div class="chips" id="chips"></div>
+  <form class="add" id="addForm">
+    <input id="newFlavor" placeholder="Add a flavor (tap VG to mark vegan)" maxlength="22">
+    <button type="submit">Add</button>
+  </form>
+  <button class="reset" id="reset">Reset to default flavors</button>
+</details>
+
+<details class="panel" id="histPanel">
+  <summary>Recent spins</summary>
+  <ul class="history" id="history"><li>No spins yet</li></ul>
+</details>
+<footer>San Mateo, Alajuela</footer>
+
+<script>
+const DEFAULT_FLAVORS = [["Mango",1],["Guanábana",1],["Maracuyá",1],["Coco",1],["Fresa",0],["Chocolate",0],["Vainilla",0],["Café",0],["Dulce de leche",0],["Mora",1],["Tamarindo",1],["Cas",1]].map(([name,v])=>({name,vegan:!!v}));
+const TREATS = [{name:"Cone",emoji:"🍦",scoops:1},{name:"Banana split",emoji:"🍌",scoops:3,topping:true},{name:"Batido (shake)",emoji:"🥤",scoops:1}];
+const TOPPINGS = ["sprinkles","hot fudge","toasted coconut","crushed cookies","caramel drizzle","fresh fruit","condensed milk","chopped peanuts"];
+const COLORS = ["#e8b65a","#efe6d3","#c9d6a8","#f4ead8","#d98c7f","#5a3b2e","#f2e8d0","#8a6a54","#c79a5b","#7b4f6b","#b9a27a","#d7a35e"];
+const INK = ["#2a1d17","#2a1d17","#2a1d17","#2a1d17","#2a1d17","#f5efe4","#2a1d17","#f5efe4","#2a1d17","#f5efe4","#2a1d17","#2a1d17"];
+
+let flavors = load() || DEFAULT_FLAVORS.map(f=>({...f}));
+let veganOnly = false;
+const active = () => veganOnly ? flavors.filter(f=>f.vegan) : flavors;
+let rotation = 0, spinning = false, mode = "single";
+let history = [];
+const wheel = document.getElementById("wheel"), ctx = wheel.getContext("2d");
+const SIZE = wheel.width, R = SIZE/2;
+
+function load(){ try{ const v = JSON.parse(localStorage.getItem("flavors2")); return Array.isArray(v)&&v.length>1&&v[0].name?v:null }catch(e){return null} }
+function save(){ try{ localStorage.setItem("flavors2", JSON.stringify(flavors)) }catch(e){} }
+
+function draw(){
+  const list = active(), n = list.length, seg = Math.PI*2/n;
+  ctx.clearRect(0,0,SIZE,SIZE);
+  for(let i=0;i<n;i++){
+    const a0 = rotation + i*seg, a1 = a0+seg;
+    ctx.beginPath(); ctx.moveTo(R,R); ctx.arc(R,R,R-8,a0,a1); ctx.closePath();
+    ctx.fillStyle = COLORS[i%COLORS.length]; ctx.fill();
+    ctx.strokeStyle = "#2a1d17"; ctx.lineWidth = 1.5; ctx.stroke();
+    const mid = a0+seg/2, m = ((mid % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
+    const flip = m > Math.PI/2 && m < Math.PI*1.5;
+    const label = list[i].name + (list[i].vegan && !veganOnly ? " · VG" : "");
+    ctx.save(); ctx.translate(R,R); ctx.rotate(flip ? mid+Math.PI : mid);
+    ctx.textAlign = flip ? "left" : "right"; ctx.textBaseline = "middle";
+    ctx.fillStyle = INK[i%INK.length];
+    let fs = Math.min(38, 300/Math.max(6,label.length)*1.6, seg*R*0.55);
+    ctx.font = `500 ${fs}px "DM Sans", sans-serif`;
+    ctx.fillText(label, flip ? -(R-44) : R-44, 0);
+    ctx.restore();
+  }
+  ctx.beginPath(); ctx.arc(R,R,R-8,0,Math.PI*2); ctx.lineWidth=3; ctx.strokeStyle="#2a1d17"; ctx.stroke();
+  ctx.beginPath(); ctx.arc(R,R,R-22,0,Math.PI*2); ctx.lineWidth=1; ctx.strokeStyle="rgba(42,29,23,.25)"; ctx.stroke();
+}
+
+// --- sound ---
+let audio;
+function tick(){
+  if(!audio) return;
+  const o = audio.createOscillator(), g = audio.createGain();
+  o.frequency.value = 900 + Math.random()*200; o.type="triangle";
+  g.gain.setValueAtTime(0.08, audio.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime+0.05);
+  o.connect(g).connect(audio.destination); o.start(); o.stop(audio.currentTime+0.06);
+}
+function chime(){
+  if(!audio) return;
+  [523,659,784,1047].forEach((f,i)=>{
+    const o=audio.createOscillator(), g=audio.createGain(), t=audio.currentTime+i*0.09;
+    o.frequency.value=f; o.type="sine";
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.15,t+0.02); g.gain.exponentialRampToValueAtTime(0.001,t+0.4);
+    o.connect(g).connect(audio.destination); o.start(t); o.stop(t+0.45);
+  });
+}
+
+function indexAtPointer(){
+  const n = active().length, seg = Math.PI*2/n;
+  const a = ((Math.PI*1.5 - rotation) % (Math.PI*2) + Math.PI*2) % (Math.PI*2);
+  return Math.floor(a/seg);
+}
+
+function spinOnce(exclude=[]){
+  return new Promise(resolve=>{
+    const n = active().length, seg = Math.PI*2/n;
+    let idx; do { idx = Math.floor(Math.random()*n) } while(exclude.length<n && exclude.includes(idx));
+    const jitter = (Math.random()-0.5)*seg*0.7;
+    const target = Math.PI*1.5 - (idx+0.5)*seg + jitter;
+    const delta = (((target - rotation) % (Math.PI*2)) + Math.PI*2) % (Math.PI*2) + Math.PI*2*(4+Math.floor(Math.random()*3));
+    const start = rotation, dur = 3800 + Math.random()*900, t0 = performance.now();
+    let last = indexAtPointer();
+    function frame(now){
+      const p = Math.min(1,(now-t0)/dur), e = 1-Math.pow(1-p,4);
+      rotation = start + delta*e; draw();
+      const cur = indexAtPointer(); if(cur!==last){ tick(); last=cur; }
+      if(p<1) requestAnimationFrame(frame); else resolve(idx);
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+const resultEl = document.getElementById("result");
+function showResult(html){ resultEl.innerHTML = html; resultEl.classList.remove("show"); void resultEl.offsetWidth; resultEl.classList.add("show"); }
+
+async function spin(){
+  const list = active();
+  if(spinning || list.length<2) return;
+  try{ audio = audio || new (window.AudioContext||window.webkitAudioContext)(); audio.resume && audio.resume(); }catch(e){}
+  spinning = true; setButtons();
+  resultEl.classList.remove("show");
+  let treat;
+  if(mode==="single") treat = {name:"Your flavor",emoji:"🍦",scoops:1};
+  else if(mode==="combo") treat = {name:"Your combo",emoji:"🍨",scoops:2,topping:true};
+  else {
+    treat = TREATS[Math.floor(Math.random()*TREATS.length)];
+    showResult(`<div class="cone">${treat.emoji}</div><div class="label">Surprise!</div><div class="big">${treat.name}</div><div class="note">now spinning for flavors…</div>`);
+    await wait(1400);
+  }
+  const picks = [];
+  for(let k=0;k<treat.scoops;k++){
+    if(k>0) await wait(600);
+    const idx = await spinOnce(picks);
+    picks.push(idx);
+    if(k<treat.scoops-1) showResult(`<div class="cone">${treat.emoji}</div><div class="label">${esc(treat.name)} · scoop ${k+1} of ${treat.scoops}</div><div class="big">${esc(list[idx].name)}</div><div class="note">spinning again…</div>`);
+  }
+  const names = picks.map(i=>list[i].name);
+  const top = treat.topping ? TOPPINGS[Math.floor(Math.random()*TOPPINGS.length)] : null;
+  const label = mode==="treat" ? treat.name : treat.name;
+  showResult(`<div class="cone">${treat.emoji}</div><div class="label">${esc(label)}</div><div class="big">${names.map(esc).join(" + ")}</div>${top?`<div class="note">topped with <b>${esc(top)}</b></div>`:""}`);
+  chime();
+  const text = (mode==="treat" ? treat.name+": " : "") + names.join(" + ") + (top ? " with "+top : "");
+  history.unshift(text); history = history.slice(0,8); renderHistory();
+  spinning = false; setButtons();
+}
+const wait = ms => new Promise(r=>setTimeout(r,ms));
+function esc(s){ return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])) }
+function setButtons(){ document.getElementById("spin").disabled = spinning || active().length<2; }
+
+function renderHistory(){
+  document.getElementById("history").innerHTML = history.length ? history.map(h=>`<li>${esc(h)}</li>`).join("") : "<li>No spins yet</li>";
+}
+
+function renderChips(){
+  document.getElementById("chips").innerHTML = flavors.map((f,i)=>
+    `<span class="chip" style="background:${COLORS[i%COLORS.length]};color:${INK[i%INK.length]}">${esc(f.name)}<button class="v ${f.vegan?"on":""}" data-v="${i}" title="Vegan / GF">VG</button><button data-i="${i}" aria-label="Remove ${esc(f.name)}">✕</button></span>`).join("");
+}
+document.getElementById("chips").addEventListener("click",e=>{
+  if(spinning) return;
+  const v = e.target.dataset.v;
+  if(v!==undefined){ flavors[+v].vegan = !flavors[+v].vegan; save(); renderChips(); draw(); setButtons(); return; }
+  const i = e.target.dataset.i; if(i===undefined) return;
+  if(flavors.length<=2) return;
+  flavors.splice(+i,1); save(); renderChips(); draw(); setButtons();
+});
+document.getElementById("addForm").addEventListener("submit",e=>{
+  e.preventDefault(); const inp = document.getElementById("newFlavor"); const v = inp.value.trim();
+  if(!v || spinning || flavors.length>=20) return;
+  flavors.push({name:v,vegan:false}); inp.value=""; save(); renderChips(); draw(); setButtons();
+});
+document.getElementById("reset").addEventListener("click",()=>{ if(spinning) return; flavors = DEFAULT_FLAVORS.map(f=>({...f})); save(); renderChips(); draw(); });
+
+document.querySelectorAll(".modes button").forEach(b=>b.addEventListener("click",()=>{
+  if(spinning) return;
+  document.querySelectorAll(".modes button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); mode = b.dataset.mode;
+}));
+document.getElementById("spin").addEventListener("click",spin);
+document.getElementById("veganOnly").addEventListener("change",e=>{ if(spinning){ e.target.checked=veganOnly; return; } veganOnly=e.target.checked; rotation=0; draw(); setButtons(); });
+document.getElementById("hub").addEventListener("click",spin);
+document.addEventListener("keydown",e=>{ if(e.code==="Space" && e.target.tagName!=="INPUT"){ e.preventDefault(); spin(); } });
+
+// --- confetti ---
+const cc = document.getElementById("confetti"), cx = cc.getContext("2d");
+let parts = [];
+function confetti(){
+  cc.width = innerWidth; cc.height = innerHeight;
+  for(let i=0;i<140;i++) parts.push({x:innerWidth/2,y:innerHeight*0.45,vx:(Math.random()-0.5)*14,vy:Math.random()*-14-4,
+    s:6+Math.random()*6,c:COLORS[i%COLORS.length],r:Math.random()*6,vr:(Math.random()-0.5)*0.3,life:0});
+  if(parts.length===140) requestAnimationFrame(cf);
+}
+function cf(){
+  cx.clearRect(0,0,cc.width,cc.height);
+  parts.forEach(p=>{ p.vy+=0.35; p.vx*=0.99; p.x+=p.vx; p.y+=p.vy; p.r+=p.vr; p.life++;
+    cx.save(); cx.translate(p.x,p.y); cx.rotate(p.r); cx.fillStyle=p.c; cx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); cx.restore(); });
+  parts = parts.filter(p=>p.y<cc.height+20 && p.life<240);
+  if(parts.length) requestAnimationFrame(cf); else cx.clearRect(0,0,cc.width,cc.height);
+}
+
+renderChips(); draw(); setButtons();
+document.fonts && document.fonts.ready.then(draw);
+</script>
+</body>
+</html>
