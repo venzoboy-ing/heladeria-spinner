@@ -5,73 +5,90 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ice Cream Flavor Spinner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#f5efe4; --paper:#fbf8f2; --ink:#2a1d17; --soft:#7a6a5f; --line:#e3d8c8;
-    --accent:#2a1d17; --green:#5d7a4e;
+    --bg:#120d0c; --paper:#1c1d22; --ink:#f3ead8; --soft:#c9b89a; --line:rgba(232,182,90,.28);
+    --gold:#e8b65a; --gold-2:#f6d58e; --crimson:#b3261e; --crimson-2:#d9382d; --steel:#3b4250; --green:#8fb573;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:'DM Sans',system-ui,sans-serif;color:var(--ink);background:var(--bg);
-    min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 18px 56px;-webkit-font-smoothing:antialiased}
-  .eyebrow{font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--soft);margin:0}
-  h1{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:clamp(40px,8vw,64px);line-height:1;margin:10px 0 8px;letter-spacing:-.01em}
-  h1 em{font-style:italic}
-  .sub{color:var(--soft);margin:0 0 28px;text-align:center;font-size:15px}
-  .rule{width:40px;height:1px;background:var(--ink);margin:0 auto 26px;opacity:.5}
-  .modes{display:flex;gap:0;border:1px solid var(--ink);border-radius:2px;margin-bottom:14px;flex-wrap:wrap;justify-content:center}
-  .modes button{border:0;background:transparent;font:inherit;font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:10px 18px;cursor:pointer;color:var(--ink)}
-  .modes button+button{border-left:1px solid var(--ink)}
-  .modes button.on{background:var(--ink);color:var(--paper)}
+  html{background:var(--bg);overflow-x:hidden;overflow-x:clip}
+  body{margin:0;font-family:'Inter',system-ui,sans-serif;color:var(--ink);
+    background:
+      radial-gradient(ellipse 70% 45% at 50% 18%, rgba(246,213,142,.55), rgba(232,182,90,.18) 45%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 15% 85%, rgba(179,38,30,.22), transparent 70%),
+      radial-gradient(ellipse 55% 45% at 90% 70%, rgba(59,66,80,.55), transparent 70%),
+      linear-gradient(180deg, #3a2a22 0%, #1d1513 45%, #0e0a0a 100%);
+    background-attachment:fixed;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 18px 56px;-webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden;overflow-x:clip}
+  .circle-bg{position:absolute;left:50%;top:50%;width:255%;aspect-ratio:1;transform:translate(-50%,-50%);z-index:-1;pointer-events:none;opacity:.22}
+  .circle-bg svg{width:100%;height:100%;animation:turn 120s linear infinite}
+  @keyframes turn{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.circle-bg svg{animation:none}}
+  body > *:not(#confetti){position:relative;z-index:1}
+  body > .wheel-wrap{z-index:0}
+  .eyebrow{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:.42em;text-transform:uppercase;color:var(--gold);margin:0}
+  h1{font-family:'Oswald',Impact,sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(46px,10vw,84px);line-height:.95;margin:12px 0 10px;letter-spacing:.02em;text-align:center;
+    background:linear-gradient(180deg,#ffffff 0%,#d9dde3 38%,#8a919c 52%,#e9ecf0 70%,#9aa1ab 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 3px 0 #2a2d33) drop-shadow(0 8px 18px rgba(0,0,0,.6))}
+  h1 em{font-style:normal;display:block;font-size:.52em;letter-spacing:.3em;margin-top:6px;
+    background:linear-gradient(180deg,#ff6a5c,#b3261e 60%,#7a140f);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--soft);margin:0 0 26px;text-align:center;font-size:15px;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+  .rule{width:120px;height:2px;margin:0 auto 26px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+  .modes{display:flex;gap:0;border:1px solid var(--gold);border-radius:3px;margin-bottom:14px;flex-wrap:wrap;justify-content:center;background:rgba(18,13,12,.6);box-shadow:0 6px 20px rgba(0,0,0,.4)}
+  .modes button{border:0;background:transparent;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:.12em;text-transform:uppercase;padding:11px 18px;cursor:pointer;color:var(--ink)}
+  .modes button+button{border-left:1px solid var(--line)}
+  .modes button.on{background:linear-gradient(180deg,var(--crimson-2),var(--crimson));color:#fff}
   .vegan{display:flex;align-items:center;gap:8px;margin:0 0 30px;color:var(--soft);cursor:pointer;user-select:none;font-size:14px}
-  .vegan input{accent-color:var(--green);width:16px;height:16px}
-  .wheel-wrap{position:relative;width:min(86vw,400px);aspect-ratio:1}
-  canvas#wheel{width:100%;height:100%;display:block}
-  .pointer{position:absolute;left:50%;top:-12px;transform:translateX(-50%);width:0;height:0;
-    border-left:11px solid transparent;border-right:11px solid transparent;border-top:22px solid var(--ink);z-index:2}
-  .hub{position:absolute;inset:0;margin:auto;width:24%;height:24%;border-radius:50%;background:var(--paper);
-    display:flex;align-items:center;justify-content:center;border:1px solid var(--ink);cursor:pointer;
-    font-family:'Instrument Serif',Georgia,serif;font-size:clamp(20px,5vw,28px);color:var(--ink);transition:background .2s}
-  .hub:hover{background:#efe6d6}
-  .spin{margin-top:30px;border:1px solid var(--ink);font:inherit;font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:var(--paper);cursor:pointer;
-    background:var(--ink);padding:15px 52px;border-radius:2px;transition:background .2s,color .2s}
-  .spin:hover{background:transparent;color:var(--ink)}
-  .spin:disabled{opacity:.4;cursor:default}
-  .result{margin-top:30px;min-height:110px;text-align:center;background:var(--paper);border:1px solid var(--line);
-    padding:20px 28px;max-width:420px;width:100%;opacity:0;transform:translateY(6px);transition:all .4s ease}
+  .vegan input{accent-color:var(--gold);width:16px;height:16px}
+  .wheel-wrap{position:relative;width:min(86vw,410px);aspect-ratio:1}
+  canvas#wheel{width:100%;height:100%;display:block;filter:drop-shadow(0 18px 40px rgba(0,0,0,.65)) drop-shadow(0 0 30px rgba(232,182,90,.25))}
+  .pointer{position:absolute;left:50%;top:-14px;transform:translateX(-50%);width:0;height:0;
+    border-left:13px solid transparent;border-right:13px solid transparent;border-top:26px solid var(--crimson-2);z-index:2;filter:drop-shadow(0 2px 0 #4a0d09) drop-shadow(0 0 6px rgba(217,56,45,.7))}
+  .hub{position:absolute;inset:0;margin:auto;width:24%;height:24%;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#5a616e,#2a2e36 60%,#16181c);
+    display:flex;align-items:center;justify-content:center;border:3px solid var(--gold);cursor:pointer;box-shadow:inset 0 2px 6px rgba(255,255,255,.15),0 0 0 4px rgba(18,13,12,.8);
+    font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(20px,5vw,28px);letter-spacing:.06em;color:var(--gold-2);transition:transform .2s,box-shadow .2s}
+  .hub:hover{transform:scale(1.04);box-shadow:inset 0 2px 6px rgba(255,255,255,.15),0 0 0 4px rgba(18,13,12,.8),0 0 18px rgba(232,182,90,.6)}
+  .spin{margin-top:32px;border:1px solid var(--gold);font-family:'Oswald',sans-serif;font-size:17px;letter-spacing:.32em;text-transform:uppercase;color:#fff;cursor:pointer;
+    background:linear-gradient(180deg,var(--crimson-2),var(--crimson) 55%,#7a140f);padding:15px 60px;border-radius:3px;box-shadow:0 8px 22px rgba(179,38,30,.45),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .15s,box-shadow .2s}
+  .spin:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(179,38,30,.6),inset 0 1px 0 rgba(255,255,255,.25)}
+  .spin:disabled{opacity:.4;cursor:default;transform:none}
+  .result{margin-top:30px;min-height:110px;text-align:center;background:rgba(28,29,34,.82);border:1px solid var(--gold);border-radius:3px;backdrop-filter:blur(4px);
+    padding:20px 28px;max-width:420px;width:100%;opacity:0;transform:translateY(6px);transition:all .4s ease;box-shadow:0 10px 30px rgba(0,0,0,.5)}
   .result.show{opacity:1;transform:none}
-  .result .label{color:var(--soft);font-size:11px;text-transform:uppercase;letter-spacing:.24em}
-  .result .big{font-family:'Instrument Serif',Georgia,serif;font-size:34px;line-height:1.15;margin-top:8px}
+  .result .label{color:var(--gold);font-family:'Oswald',sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:.3em}
+  .result .big{font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;font-size:34px;line-height:1.1;margin-top:8px;color:#fff}
   .result .note{color:var(--soft);margin-top:6px;font-size:15px}
-  .result .note b{color:var(--ink);font-weight:500}
+  .result .note b{color:var(--gold-2);font-weight:600}
   .cone{display:none}
   .panel{margin-top:16px;width:100%;max-width:420px;border-top:1px solid var(--line);padding:16px 2px 4px}
   .panel+.panel{margin-top:0}
-  .panel summary{cursor:pointer;font-size:13px;letter-spacing:.14em;text-transform:uppercase;list-style:none;display:flex;justify-content:space-between}
+  .panel summary{cursor:pointer;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);list-style:none;display:flex;justify-content:space-between}
   .panel summary::-webkit-details-marker{display:none}
   .panel summary::after{content:'+';font-size:18px;line-height:1}
   .panel[open] summary::after{content:'–'}
   .chips{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0}
   .chip{display:flex;align-items:center;gap:4px;padding:5px 6px 5px 12px;border:1px solid var(--line);background:var(--paper);border-radius:2px;font-size:14px}
-  .chip button{border:0;background:transparent;color:var(--soft);cursor:pointer;font:inherit;font-size:12px;padding:2px 5px}
+  .chip button{border:0;background:transparent;color:inherit;opacity:.7;cursor:pointer;font:inherit;font-size:12px;padding:2px 5px}
   .chip .v{font-size:11px;letter-spacing:.08em;opacity:.35}
   .chip .v.on{opacity:1;color:var(--green);font-weight:700}
   .add{display:flex;gap:8px}
-  .add input{flex:1;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);background:var(--paper);border-radius:2px;outline:none}
-  .add input:focus{border-color:var(--ink)}
-  .add button{font:inherit;font-size:13px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--ink);background:transparent;padding:10px 16px;cursor:pointer;border-radius:2px}
+  .add input{flex:1;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:2px;outline:none}
+  .add input:focus{border-color:var(--gold)}
+  .add button{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--gold);background:transparent;color:var(--gold);padding:10px 16px;cursor:pointer;border-radius:2px}
   .reset{font:inherit;font-size:13px;border:0;background:transparent;color:var(--soft);padding:10px 0 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
   .history{list-style:none;padding:0;margin:12px 0 0;color:var(--soft);font-size:14px}
   .history li{padding:7px 0;border-bottom:1px solid var(--line)}
   .history li:last-child{border:0}
-  footer{margin-top:40px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft)}
+  footer{margin-top:40px;font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold)}
   #confetti{display:none}
 </style>
 </head>
 <body>
 <canvas id="confetti"></canvas>
 <p class="eyebrow">Heladería · San Mateo</p>
-<h1>Spin the <em>scoop</em></h1>
+<h1>Spin the<em>scoop</em></h1>
 <p class="sub">Can't decide? Let the wheel choose for you.</p>
 <div class="rule"></div>
 
@@ -83,6 +100,7 @@
 <label class="vegan"><input type="checkbox" id="veganOnly"> Vegan &amp; gluten-free only</label>
 
 <div class="wheel-wrap">
+  <div class="circle-bg" aria-hidden="true"><svg viewBox="0 0 1000 1000" fill="none" stroke="#e8b65a" stroke-width="3"><circle cx="500" cy="500" r="490" stroke-width="2"/><circle cx="500" cy="500" r="455"/><polygon points="500,45 894,727.5 106,727.5"/><polygon points="500,955 106,272.5 894,272.5"/><circle cx="500" cy="500" r="300"/><polygon points="500,200 800,500 500,800 200,500"/><rect x="288" y="288" width="424" height="424"/><circle cx="500" cy="500" r="120"/><circle cx="500" cy="500" r="60" stroke-width="2"/><circle cx="500" cy="45" r="28"/><circle cx="894" cy="727.5" r="28"/><circle cx="106" cy="727.5" r="28"/><circle cx="500" cy="955" r="28"/><circle cx="106" cy="272.5" r="28"/><circle cx="894" cy="272.5" r="28"/></svg></div>
   <div class="pointer"></div>
   <canvas id="wheel" width="840" height="840"></canvas>
   <button class="hub" id="hub" aria-label="Spin">SM</button>
@@ -112,8 +130,8 @@
 const DEFAULT_FLAVORS = [["Mango",1],["Guanábana",1],["Maracuyá",1],["Coco",1],["Fresa",0],["Chocolate",0],["Vainilla",0],["Café",0],["Dulce de leche",0],["Mora",1],["Tamarindo",1],["Cas",1]].map(([name,v])=>({name,vegan:!!v}));
 const TREATS = [{name:"Cone",emoji:"🍦",scoops:1},{name:"Banana split",emoji:"🍌",scoops:3,topping:true},{name:"Batido (shake)",emoji:"🥤",scoops:1}];
 const TOPPINGS = ["sprinkles","hot fudge","toasted coconut","crushed cookies","caramel drizzle","fresh fruit","condensed milk","chopped peanuts"];
-const COLORS = ["#e8b65a","#efe6d3","#c9d6a8","#f4ead8","#d98c7f","#5a3b2e","#f2e8d0","#8a6a54","#c79a5b","#7b4f6b","#b9a27a","#d7a35e"];
-const INK = ["#2a1d17","#2a1d17","#2a1d17","#2a1d17","#2a1d17","#f5efe4","#2a1d17","#f5efe4","#2a1d17","#f5efe4","#2a1d17","#2a1d17"];
+const COLORS = ["#8e1f1a","#3b4250","#c9973f","#22314a","#7a3b22","#4a5233","#a8291f","#2e3440","#d4a24c","#1e2a3f","#6b2f1c","#55606e"];
+const INK = ["#f3ead8","#f3ead8","#1a1210","#f3ead8","#f3ead8","#f3ead8","#f3ead8","#f3ead8","#1a1210","#f3ead8","#f3ead8","#f3ead8"];
 
 let flavors = load() || DEFAULT_FLAVORS.map(f=>({...f}));
 let veganOnly = false;
@@ -133,7 +151,7 @@ function draw(){
     const a0 = rotation + i*seg, a1 = a0+seg;
     ctx.beginPath(); ctx.moveTo(R,R); ctx.arc(R,R,R-8,a0,a1); ctx.closePath();
     ctx.fillStyle = COLORS[i%COLORS.length]; ctx.fill();
-    ctx.strokeStyle = "#2a1d17"; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.strokeStyle = "rgba(232,182,90,.55)"; ctx.lineWidth = 2; ctx.stroke();
     const mid = a0+seg/2, m = ((mid % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
     const flip = m > Math.PI/2 && m < Math.PI*1.5;
     const label = list[i].name + (list[i].vegan && !veganOnly ? " · VG" : "");
@@ -141,12 +159,12 @@ function draw(){
     ctx.textAlign = flip ? "left" : "right"; ctx.textBaseline = "middle";
     ctx.fillStyle = INK[i%INK.length];
     let fs = Math.min(38, 300/Math.max(6,label.length)*1.6, seg*R*0.55);
-    ctx.font = `500 ${fs}px "DM Sans", sans-serif`;
+    ctx.font = `600 ${fs}px "Oswald", sans-serif`;
     ctx.fillText(label, flip ? -(R-44) : R-44, 0);
     ctx.restore();
   }
-  ctx.beginPath(); ctx.arc(R,R,R-8,0,Math.PI*2); ctx.lineWidth=3; ctx.strokeStyle="#2a1d17"; ctx.stroke();
-  ctx.beginPath(); ctx.arc(R,R,R-22,0,Math.PI*2); ctx.lineWidth=1; ctx.strokeStyle="rgba(42,29,23,.25)"; ctx.stroke();
+  ctx.beginPath(); ctx.arc(R,R,R-8,0,Math.PI*2); ctx.lineWidth=8; ctx.strokeStyle="#e8b65a"; ctx.stroke();
+  ctx.beginPath(); ctx.arc(R,R,R-22,0,Math.PI*2); ctx.lineWidth=1; ctx.strokeStyle="rgba(18,13,12,.55)"; ctx.stroke();
 }
 
 // --- sound ---
@@ -282,6 +300,7 @@ function cf(){
 
 renderChips(); draw(); setButtons();
 document.fonts && document.fonts.ready.then(draw);
+document.fonts && document.fonts.load('600 30px "Oswald"').then(draw);
 </script>
 </body>
 </html>
